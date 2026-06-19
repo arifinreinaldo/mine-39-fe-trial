@@ -305,6 +305,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     unit.strength += 1;
     unit.skill += 1;
     unit.speed += 1;
+    unit.clampToCaps();
     unit.clampHp();
   }
 }

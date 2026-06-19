@@ -62,7 +62,7 @@ class ChapterRepository {
     final weapon = weaponId != null
         ? Weapon.byId(weaponId)
         : Weapon.catalogue.values.firstWhere(
-            (w) => w.type == unitClass.defaultWeapon,
+            (w) => w.type == unitClass.primaryWeapon,
             orElse: () => Weapon.byId('ironSword'),
           );
 
@@ -82,6 +82,8 @@ class ChapterRepository {
       luck: json['luck'] as int,
       defense: json['defense'] as int,
       resistance: json['resistance'] as int,
+      con: (json['con'] as int?) ?? 8,
+      gender: json['gender'] == 'female' ? Gender.female : Gender.male,
       weapon: weapon,
       x: json['x'] as int,
       y: json['y'] as int,

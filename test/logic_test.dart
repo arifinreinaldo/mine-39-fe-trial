@@ -43,6 +43,7 @@ Unit makeUnit({
   int luck = 0,
   int defense = 0,
   int resistance = 0,
+  int con = 20,
   int? movement,
 }) {
   return Unit(
@@ -58,6 +59,7 @@ Unit makeUnit({
     luck: luck,
     defense: defense,
     resistance: resistance,
+    con: con,
     weapon: weapon,
     x: x,
     y: y,
@@ -261,6 +263,107 @@ void main() {
       expect(decision.target!.id, 'p');
       // It should stop adjacent to the player (within weapon range 1).
       expect(MovementSystem.manhattan(decision.destination, player.position), 1);
+    });
+  });
+
+  group('effectiveness & weight', () {
+    test('bows triple their might against fliers', () {
+      final board = buildBoard([
+        [0, 0, 0],
+      ], []);
+      final archer = makeUnit(
+        id: 'arc',
+        unitClass: UnitClass.archer,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironBow'), // might 6, effective vs flying
+        x: 0,
+        y: 0,
+        strength: 8,
+      );
+      final flier = makeUnit(
+        id: 'fly',
+        unitClass: UnitClass.wyvernRider, // flying
+        faction: Faction.enemy,
+        weapon: Weapon.byId('ironLance'),
+        x: 2,
+        y: 0,
+        defense: 5,
+      );
+      final footSoldier = makeUnit(
+        id: 'foot',
+        unitClass: UnitClass.soldier, // not flying
+        faction: Faction.enemy,
+        weapon: Weapon.byId('ironLance'),
+        x: 1,
+        y: 0,
+        defense: 5,
+      );
+      board.units.addAll([archer, flier, footSoldier]);
+      final combat = CombatSystem(board, rng: Random(1));
+
+      // 8 + (6*3) - 5 = 21 against the flier; 8 + 6 - 5 = 9 against the footman.
+      expect(combat.isEffective(archer, flier), isTrue);
+      expect(combat.damage(archer, flier), 21);
+      expect(combat.isEffective(archer, footSoldier), isFalse);
+      expect(combat.damage(archer, footSoldier), 9);
+    });
+
+    test('a weapon heavier than CON lowers attack speed', () {
+      final heavy = makeUnit(
+        id: 'h',
+        unitClass: UnitClass.fighter,
+        faction: Faction.player,
+        weapon: Weapon.byId('hammer'), // weight 12
+        x: 0,
+        y: 0,
+        speed: 10,
+        con: 8, // 12 - 8 = 4 penalty
+      );
+      expect(heavy.attackSpeed, 6);
+
+      final strong = makeUnit(
+        id: 's',
+        unitClass: UnitClass.fighter,
+        faction: Faction.player,
+        weapon: Weapon.byId('hammer'),
+        x: 0,
+        y: 0,
+        speed: 10,
+        con: 14, // no penalty
+      );
+      expect(strong.attackSpeed, 10);
+    });
+  });
+
+  group('stat caps', () {
+    test('unpromoted classes clamp combat stats at 20', () {
+      final u = makeUnit(
+        id: 'u',
+        unitClass: UnitClass.soldier,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironLance'),
+        x: 0,
+        y: 0,
+        strength: 25,
+        speed: 24,
+      );
+      u.clampToCaps();
+      expect(u.strength, 20);
+      expect(u.speed, 20);
+    });
+
+    test('a General can exceed 20 defense (cap 30)', () {
+      final g = makeUnit(
+        id: 'g',
+        unitClass: UnitClass.general,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironLance'),
+        x: 0,
+        y: 0,
+        defense: 35,
+      );
+      g.clampToCaps();
+      expect(g.defense, 30);
     });
   });
 }

@@ -61,6 +61,8 @@ class CombatForecast {
     required this.defenderHit,
     required this.defenderCrit,
     required this.defenderDoubles,
+    required this.attackerEffective,
+    required this.defenderEffective,
   });
 
   final Unit attacker;
@@ -74,6 +76,8 @@ class CombatForecast {
   final int defenderHit;
   final int defenderCrit;
   final bool defenderDoubles;
+  final bool attackerEffective;
+  final bool defenderEffective;
 }
 
 /// Combat math and resolution.
@@ -101,6 +105,10 @@ class CombatSystem {
     return (accuracy - avoid).clamp(0, 100);
   }
 
+  /// Whether [a]'s weapon is "effective" (triple might) against [d]'s body type.
+  bool isEffective(Unit a, Unit d) =>
+      a.weapon.effectiveVs.any(d.unitClass.traits.contains);
+
   int damage(Unit a, Unit d) {
     final tri = Weapon.triangle(a.weapon.type, d.weapon.type);
     final triMight = switch (tri) {
@@ -108,15 +116,19 @@ class CombatSystem {
       TriangleResult.disadvantage => -1,
       TriangleResult.neutral => 0,
     };
+    final might =
+        a.weapon.might * (isEffective(a, d) ? Weapon.effectiveMultiplier : 1);
     final base = a.weapon.isMagic ? a.magic - d.resistance : a.strength - d.defense;
-    final raw = base + a.weapon.might + triMight - board.tileAt(d.position).defenseBonus;
+    final raw = base + might + triMight - board.tileAt(d.position).defenseBonus;
     return raw.clamp(0, 99);
   }
 
   int critChance(Unit a, Unit d) =>
       (a.weapon.crit + a.skill ~/ 2 - d.luck).clamp(0, 100);
 
-  bool doubles(Unit a, Unit d) => a.speed - d.speed >= 4;
+  /// Doubling uses *attack speed* (speed minus the weight-over-CON penalty),
+  /// so heavy weapons can cost a unit its follow-up.
+  bool doubles(Unit a, Unit d) => a.attackSpeed - d.attackSpeed >= 4;
 
   bool canCounter(Unit defender, Unit attacker) =>
       defender.isAlive &&
@@ -132,6 +144,8 @@ class CombatSystem {
       attackerHit: hitChance(a, d),
       attackerCrit: critChance(a, d),
       attackerDoubles: doubles(a, d),
+      attackerEffective: isEffective(a, d),
+      defenderEffective: defCanCounter && isEffective(d, a),
       defenderCanCounter: defCanCounter,
       defenderDamage: defCanCounter ? damage(d, a) : 0,
       defenderHit: defCanCounter ? hitChance(d, a) : 0,

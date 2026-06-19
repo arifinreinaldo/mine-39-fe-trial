@@ -11,6 +11,7 @@ import '../game/widgets/action_menu.dart';
 import '../game/widgets/combat_preview_panel.dart';
 import '../game/widgets/game_board_view.dart';
 import '../game/widgets/unit_info_panel.dart';
+import '../l10n/game_strings.dart';
 
 /// Hosts the [GameBloc] and lays the touch UI over the board.
 class BattleScreen extends StatelessWidget {
@@ -28,10 +29,23 @@ class BattleScreen extends StatelessWidget {
   }
 }
 
-class _BattleScaffold extends StatelessWidget {
+class _BattleScaffold extends StatefulWidget {
   const _BattleScaffold({required this.chapterAsset});
 
   final String chapterAsset;
+
+  @override
+  State<_BattleScaffold> createState() => _BattleScaffoldState();
+}
+
+class _BattleScaffoldState extends State<_BattleScaffold> {
+  /// Cycle the active locale. Because every display name is resolved through
+  /// [GameStrings.current], flipping it and rebuilding relabels the whole game.
+  void _cycleLocale() {
+    final all = GameStrings.all;
+    final next = all[(all.indexOf(GameStrings.current) + 1) % all.length];
+    setState(() => GameStrings.current = next);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +54,11 @@ class _BattleScaffold extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Ember Tactics'),
         actions: [
+          IconButton(
+            tooltip: 'Language: ${GameStrings.current.localeCode.toUpperCase()}',
+            icon: const Icon(Icons.translate),
+            onPressed: _cycleLocale,
+          ),
           BlocBuilder<GameBloc, GameState>(
             builder: (context, state) {
               final isPlayerTurn = state is PlayerTurnIdle || state is UnitSelected;
@@ -118,11 +137,7 @@ class _BattleScaffold extends StatelessWidget {
     return Stack(
       children: [
         if (activeUnit != null)
-          Positioned(
-            left: 8,
-            top: 8,
-            child: UnitInfoPanel(unit: activeUnit),
-          ),
+          Positioned(left: 8, top: 8, child: UnitInfoPanel(unit: activeUnit)),
         if (state is UnitActionMenu)
           Align(
             alignment: Alignment.bottomCenter,
@@ -199,7 +214,7 @@ class _BattleScaffold extends StatelessWidget {
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () =>
-                    context.read<GameBloc>().add(GameStarted(chapterAsset)),
+                    context.read<GameBloc>().add(GameStarted(widget.chapterAsset)),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Play Again'),
               ),

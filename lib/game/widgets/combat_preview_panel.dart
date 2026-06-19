@@ -33,10 +33,11 @@ class CombatPreviewPanel extends StatelessWidget {
                   hit: forecast.attackerHit,
                   crit: forecast.attackerCrit,
                   doubles: forecast.attackerDoubles,
+                  effective: forecast.attackerEffective,
                   canAct: true,
                   highlight: Colors.lightBlueAccent,
                 ),
-                Container(width: 1, height: 96, color: Colors.white24),
+                Container(width: 1, height: 104, color: Colors.white24),
                 _side(
                   name: forecast.defender.name,
                   hp: '${forecast.defender.hp}/${forecast.defender.maxHp}',
@@ -44,6 +45,7 @@ class CombatPreviewPanel extends StatelessWidget {
                   hit: forecast.defenderHit,
                   crit: forecast.defenderCrit,
                   doubles: forecast.defenderDoubles,
+                  effective: forecast.defenderEffective,
                   canAct: forecast.defenderCanCounter,
                   highlight: Colors.redAccent,
                 ),
@@ -80,6 +82,7 @@ class CombatPreviewPanel extends StatelessWidget {
     required int hit,
     required int crit,
     required bool doubles,
+    required bool effective,
     required bool canAct,
     required Color highlight,
   }) {
@@ -97,6 +100,15 @@ class CombatPreviewPanel extends StatelessWidget {
                 style: const TextStyle(fontSize: 13)),
             Text('Hit  $hit%', style: const TextStyle(fontSize: 13)),
             Text('Crit $crit%', style: const TextStyle(fontSize: 13)),
+            if (effective)
+              const Padding(
+                padding: EdgeInsets.only(top: 2),
+                child: Text('Effective ×3!',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFFC107))),
+              ),
           ] else
             const Text('No counter',
                 style: TextStyle(fontSize: 12, color: Colors.white54)),

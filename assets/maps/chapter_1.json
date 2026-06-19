@@ -23,15 +23,17 @@
     [2, 2, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 2, 2]
   ],
   "units": [
-    {"id": "kira", "name": "Kira", "class": "myrmidon", "faction": "player", "weapon": "swiftEdge", "level": 3, "x": 2, "y": 5, "hp": 20, "strength": 7, "magic": 0, "skill": 12, "speed": 13, "luck": 8, "defense": 5, "resistance": 3},
-    {"id": "bram", "name": "Bram", "class": "knight", "faction": "player", "weapon": "ironLance", "level": 3, "x": 1, "y": 5, "hp": 28, "strength": 9, "magic": 0, "skill": 6, "speed": 4, "luck": 3, "defense": 11, "resistance": 2},
-    {"id": "lyle", "name": "Lyle", "class": "archer", "faction": "player", "weapon": "ironBow", "level": 3, "x": 1, "y": 6, "hp": 22, "strength": 8, "magic": 0, "skill": 9, "speed": 8, "luck": 5, "defense": 5, "resistance": 3},
-    {"id": "mira", "name": "Mira", "class": "mage", "faction": "player", "weapon": "flame", "level": 3, "x": 1, "y": 4, "hp": 18, "strength": 2, "magic": 9, "skill": 8, "speed": 7, "luck": 6, "defense": 3, "resistance": 6},
+    {"id": "kira", "name": "Kira", "class": "myrmidon", "faction": "player", "gender": "female", "weapon": "swiftEdge", "level": 3, "x": 2, "y": 5, "hp": 20, "strength": 7, "magic": 0, "skill": 12, "speed": 13, "luck": 8, "defense": 5, "resistance": 3, "con": 7},
+    {"id": "bram", "name": "Bram", "class": "knight", "faction": "player", "weapon": "ironLance", "level": 3, "x": 1, "y": 5, "hp": 28, "strength": 9, "magic": 0, "skill": 6, "speed": 4, "luck": 3, "defense": 11, "resistance": 2, "con": 12},
+    {"id": "lyle", "name": "Lyle", "class": "archer", "faction": "player", "weapon": "ironBow", "level": 3, "x": 1, "y": 6, "hp": 22, "strength": 8, "magic": 0, "skill": 9, "speed": 8, "luck": 5, "defense": 5, "resistance": 3, "con": 8},
+    {"id": "mira", "name": "Mira", "class": "mage", "faction": "player", "gender": "female", "weapon": "flame", "level": 3, "x": 1, "y": 4, "hp": 18, "strength": 2, "magic": 9, "skill": 8, "speed": 7, "luck": 6, "defense": 3, "resistance": 6, "con": 5},
+    {"id": "tora", "name": "Tora", "class": "fighter", "faction": "player", "weapon": "hammer", "level": 4, "x": 2, "y": 6, "hp": 30, "strength": 11, "magic": 0, "skill": 6, "speed": 6, "luck": 2, "defense": 8, "resistance": 1, "con": 14},
 
-    {"id": "raider", "name": "Raider", "class": "fighter", "faction": "enemy", "weapon": "ironAxe", "level": 2, "x": 9, "y": 3, "hp": 24, "strength": 8, "magic": 0, "skill": 4, "speed": 5, "luck": 1, "defense": 4, "resistance": 1},
-    {"id": "pike1", "name": "Pikeman", "class": "soldier", "faction": "enemy", "weapon": "ironLance", "level": 2, "x": 9, "y": 6, "hp": 22, "strength": 7, "magic": 0, "skill": 6, "speed": 6, "luck": 2, "defense": 6, "resistance": 2},
-    {"id": "pike2", "name": "Pikeman", "class": "soldier", "faction": "enemy", "weapon": "ironLance", "level": 2, "x": 12, "y": 5, "hp": 22, "strength": 7, "magic": 0, "skill": 6, "speed": 6, "luck": 2, "defense": 6, "resistance": 2},
-    {"id": "bowman", "name": "Bowman", "class": "archer", "faction": "enemy", "weapon": "ironBow", "level": 2, "x": 13, "y": 2, "hp": 20, "strength": 7, "magic": 0, "skill": 7, "speed": 7, "luck": 2, "defense": 4, "resistance": 2},
-    {"id": "gorr", "name": "Gorr", "class": "fighter", "faction": "enemy", "weapon": "ironAxe", "level": 5, "x": 12, "y": 4, "hp": 30, "strength": 10, "magic": 0, "skill": 6, "speed": 5, "luck": 3, "defense": 7, "resistance": 2}
+    {"id": "raider", "name": "Raider", "class": "fighter", "faction": "enemy", "weapon": "ironAxe", "level": 2, "x": 9, "y": 3, "hp": 24, "strength": 8, "magic": 0, "skill": 4, "speed": 5, "luck": 1, "defense": 4, "resistance": 1, "con": 11},
+    {"id": "pike1", "name": "Pikeman", "class": "soldier", "faction": "enemy", "weapon": "ironLance", "level": 2, "x": 9, "y": 6, "hp": 22, "strength": 7, "magic": 0, "skill": 6, "speed": 6, "luck": 2, "defense": 6, "resistance": 2, "con": 9},
+    {"id": "guard", "name": "Guard", "class": "knight", "faction": "enemy", "weapon": "ironLance", "level": 3, "x": 12, "y": 5, "hp": 26, "strength": 8, "magic": 0, "skill": 5, "speed": 4, "luck": 2, "defense": 12, "resistance": 1, "con": 13},
+    {"id": "kestrel", "name": "Kestrel", "class": "wyvernRider", "faction": "enemy", "weapon": "ironLance", "level": 3, "x": 10, "y": 2, "hp": 24, "strength": 8, "magic": 0, "skill": 6, "speed": 9, "luck": 3, "defense": 7, "resistance": 5, "con": 10},
+    {"id": "bowman", "name": "Bowman", "class": "archer", "faction": "enemy", "weapon": "ironBow", "level": 2, "x": 13, "y": 2, "hp": 20, "strength": 7, "magic": 0, "skill": 7, "speed": 7, "luck": 2, "defense": 4, "resistance": 2, "con": 8},
+    {"id": "gorr", "name": "Gorr", "class": "fighter", "faction": "enemy", "weapon": "ironAxe", "level": 5, "x": 12, "y": 4, "hp": 30, "strength": 10, "magic": 0, "skill": 6, "speed": 5, "luck": 3, "defense": 7, "resistance": 2, "con": 13}
   ]
 }

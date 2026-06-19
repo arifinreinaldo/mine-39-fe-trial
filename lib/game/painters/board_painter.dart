@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../../data/models/game_board.dart';
 import '../../data/models/terrain.dart';
 import '../../data/models/unit.dart';
+import '../../data/models/unit_class.dart';
+import '../../l10n/game_strings.dart';
 
 /// A transient damage / miss number rising above a tile. [t] runs 0 -> 1.
 class FloatingLabel {
@@ -54,15 +56,16 @@ class BoardPainter extends CustomPainter {
     Faction.npc: Color(0xFF53B36B),
   };
 
-  static const _classCode = {
-    'Lord': 'Lo',
-    'Myrmidon': 'My',
-    'Knight': 'Kn',
-    'Soldier': 'So',
-    'Fighter': 'Fi',
-    'Archer': 'Ar',
-    'Mage': 'Ma',
-  };
+  /// A short token label derived from the unit's (localized) class name, so it
+  /// follows whatever locale is active.
+  static String _codeFor(UnitClass c) {
+    final name = GameStrings.current.className(c);
+    final parts = name.split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.length >= 2 ? name.substring(0, 2) : name;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -148,7 +151,7 @@ class BoardPainter extends CustomPainter {
 
       _drawText(
         canvas,
-        _classCode[unit.unitClass.label] ?? '??',
+        _codeFor(unit.unitClass),
         rect.center.translate(0, -cellSize * 0.04),
         color: Colors.white,
         size: cellSize * 0.28,

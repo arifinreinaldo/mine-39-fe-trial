@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/battle_screen.dart';
+import 'screens/title_screen.dart';
 
 void main() {
   runApp(const EmberTacticsApp());
@@ -19,7 +19,7 @@ class EmberTacticsApp extends StatelessWidget {
         brightness: Brightness.dark,
         colorSchemeSeed: const Color(0xFFB5462E),
       ),
-      home: const BattleScreen(),
+      home: const TitleScreen(),
     );
   }
 }

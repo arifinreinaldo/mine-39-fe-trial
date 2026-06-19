@@ -1,0 +1,40 @@
+{
+  "name": "Chapter 2 — The Twin Lakes",
+  "width": 13,
+  "height": 10,
+  "tileLegend": {
+    "0": "plain",
+    "1": "forest",
+    "2": "mountain",
+    "3": "fort",
+    "4": "water",
+    "5": "wall"
+  },
+  "tiles": [
+    [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0],
+    [0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2]
+  ],
+  "units": [
+    {"id": "kira", "name": "Kira", "class": "myrmidon", "faction": "player", "gender": "female", "weapon": "swiftEdge", "level": 5, "x": 3, "y": 5, "hp": 22, "strength": 9, "magic": 0, "skill": 14, "speed": 15, "luck": 9, "defense": 6, "resistance": 4, "con": 7, "items": ["vulnerary"]},
+    {"id": "bram", "name": "Bram", "class": "knight", "faction": "player", "weapon": "ironLance", "level": 5, "x": 0, "y": 5, "hp": 30, "strength": 11, "magic": 0, "skill": 7, "speed": 5, "luck": 4, "defense": 13, "resistance": 3, "con": 12},
+    {"id": "lyle", "name": "Lyle", "class": "archer", "faction": "player", "weapon": "ironBow", "level": 5, "x": 0, "y": 6, "hp": 24, "strength": 10, "magic": 0, "skill": 11, "speed": 10, "luck": 6, "defense": 6, "resistance": 4, "con": 8},
+    {"id": "mira", "name": "Mira", "class": "mage", "faction": "player", "gender": "female", "weapon": "flame", "level": 5, "x": 0, "y": 4, "hp": 20, "strength": 2, "magic": 11, "skill": 10, "speed": 9, "luck": 7, "defense": 4, "resistance": 8, "con": 5},
+    {"id": "tora", "name": "Tora", "class": "fighter", "faction": "player", "weapon": "hammer", "level": 5, "x": 3, "y": 4, "hp": 32, "strength": 13, "magic": 0, "skill": 8, "speed": 8, "luck": 3, "defense": 9, "resistance": 2, "con": 14},
+    {"id": "sari", "name": "Sari", "class": "cleric", "faction": "player", "gender": "female", "weapon": "healStaff", "level": 4, "x": 1, "y": 4, "hp": 19, "strength": 1, "magic": 7, "skill": 6, "speed": 8, "luck": 8, "defense": 3, "resistance": 7, "con": 5, "items": ["vulnerary"]},
+
+    {"id": "brigand", "name": "Brigand", "class": "fighter", "faction": "enemy", "weapon": "ironAxe", "level": 4, "x": 9, "y": 4, "hp": 26, "strength": 10, "magic": 0, "skill": 5, "speed": 6, "luck": 1, "defense": 5, "resistance": 1, "con": 11},
+    {"id": "lancer", "name": "Lancer", "class": "soldier", "faction": "enemy", "weapon": "ironLance", "level": 4, "x": 9, "y": 5, "hp": 24, "strength": 8, "magic": 0, "skill": 7, "speed": 7, "luck": 2, "defense": 7, "resistance": 2, "con": 9},
+    {"id": "bowman2", "name": "Bowman", "class": "archer", "faction": "enemy", "weapon": "ironBow", "level": 4, "x": 12, "y": 4, "hp": 22, "strength": 8, "magic": 0, "skill": 8, "speed": 8, "luck": 2, "defense": 5, "resistance": 2, "con": 8},
+    {"id": "rider", "name": "Rider", "class": "cavalier", "faction": "enemy", "weapon": "ironLance", "level": 4, "x": 9, "y": 6, "hp": 26, "strength": 9, "magic": 0, "skill": 6, "speed": 7, "luck": 2, "defense": 7, "resistance": 2, "con": 11},
+    {"id": "drake", "name": "Drake", "class": "wyvernRider", "faction": "enemy", "weapon": "ironLance", "level": 5, "x": 12, "y": 6, "hp": 26, "strength": 9, "magic": 0, "skill": 6, "speed": 9, "luck": 3, "defense": 8, "resistance": 5, "con": 11},
+    {"id": "varn", "name": "Varn", "class": "general", "faction": "enemy", "weapon": "ironLance", "level": 8, "x": 6, "y": 2, "hp": 36, "strength": 12, "magic": 0, "skill": 8, "speed": 6, "luck": 4, "defense": 16, "resistance": 5, "con": 15}
+  ]
+}

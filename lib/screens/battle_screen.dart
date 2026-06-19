@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../data/campaign.dart';
 import '../data/repositories/chapter_repository.dart';
 import '../game/bloc/game_bloc.dart';
 import '../game/bloc/game_event.dart';
@@ -14,34 +15,42 @@ import '../game/widgets/promotion_menu.dart';
 import '../game/widgets/unit_info_panel.dart';
 import '../l10n/game_strings.dart';
 
-/// Hosts the [GameBloc] and lays the touch UI over the board.
-class BattleScreen extends StatelessWidget {
-  const BattleScreen({super.key, this.chapterAsset = 'assets/maps/chapter_1.json'});
+/// Hosts the [GameBloc] for one campaign run and lays the touch UI over the
+/// board. Owns the chapter index so it can advance to the next chapter on a win.
+class BattleScreen extends StatefulWidget {
+  const BattleScreen({super.key, this.chapterIndex = 0});
 
-  final String chapterAsset;
+  final int chapterIndex;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => GameBloc(repository: const ChapterRepository())
-        ..add(GameStarted(chapterAsset)),
-      child: _BattleScaffold(chapterAsset: chapterAsset),
-    );
+  State<BattleScreen> createState() => _BattleScreenState();
+}
+
+class _BattleScreenState extends State<BattleScreen> {
+  late final GameBloc _bloc;
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.chapterIndex;
+    _bloc = GameBloc(repository: const ChapterRepository())
+      ..add(GameStarted(Campaign.chapters[_index]));
   }
-}
-
-class _BattleScaffold extends StatefulWidget {
-  const _BattleScaffold({required this.chapterAsset});
-
-  final String chapterAsset;
 
   @override
-  State<_BattleScaffold> createState() => _BattleScaffoldState();
-}
+  void dispose() {
+    _bloc.close();
+    super.dispose();
+  }
 
-class _BattleScaffoldState extends State<_BattleScaffold> {
-  /// Cycle the active locale. Because every display name is resolved through
-  /// [GameStrings.current], flipping it and rebuilding relabels the whole game.
+  void _restartChapter() => _bloc.add(GameStarted(Campaign.chapters[_index]));
+
+  void _nextChapter() {
+    setState(() => _index++);
+    _bloc.add(GameStarted(Campaign.chapters[_index]));
+  }
+
   void _cycleLocale() {
     final all = GameStrings.all;
     final next = all[(all.indexOf(GameStrings.current) + 1) % all.length];
@@ -50,10 +59,18 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider.value(value: _bloc, child: _scaffold());
+  }
+
+  Widget _scaffold() {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1C22),
       appBar: AppBar(
-        title: const Text('Ember Tactics'),
+        title: BlocBuilder<GameBloc, GameState>(
+          builder: (context, state) => Text(
+              state is BattleState ? state.board.chapterName : 'Ember Tactics',
+              style: const TextStyle(fontSize: 16)),
+        ),
         actions: [
           IconButton(
             tooltip: 'Language: ${GameStrings.current.localeCode.toUpperCase()}',
@@ -62,21 +79,13 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
           ),
           BlocBuilder<GameBloc, GameState>(
             builder: (context, state) {
-              final isPlayerTurn = state is PlayerTurnIdle || state is UnitSelected;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Row(
-                  children: [
-                    Chip(label: Text(_phaseLabel(state))),
-                    const SizedBox(width: 8),
-                    TextButton(
-                      onPressed: isPlayerTurn
-                          ? () => context.read<GameBloc>().add(const EndTurnRequested())
-                          : null,
-                      child: const Text('End Turn'),
-                    ),
-                  ],
-                ),
+              final isPlayerTurn =
+                  state is PlayerTurnIdle || state is UnitSelected;
+              return TextButton(
+                onPressed: isPlayerTurn
+                    ? () => context.read<GameBloc>().add(const EndTurnRequested())
+                    : null,
+                child: Text(GameStrings.current.ui('endTurn')),
               );
             },
           ),
@@ -85,9 +94,9 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
       body: BlocConsumer<GameBloc, GameState>(
         listener: (context, state) {
           if (state is EnemyTurnBanner) {
-            _flash(context, 'Enemy Phase');
+            _flash(context, GameStrings.current.ui('enemyPhase'));
           } else if (state is PlayerTurnIdle && state.showPhaseBanner) {
-            _flash(context, 'Player Phase');
+            _flash(context, GameStrings.current.ui('playerPhase'));
           }
         },
         builder: (context, state) {
@@ -116,7 +125,8 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
                   Positioned.fill(
                     child: Center(child: GameBoardView(cellSize: cell)),
                   ),
-                  _buildOverlays(context, state),
+                  _hud(context, state),
+                  _overlays(context, state),
                 ],
               );
             },
@@ -126,7 +136,38 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
     );
   }
 
-  Widget _buildOverlays(BuildContext context, BattleState state) {
+  Widget _hud(BuildContext context, GameState state) {
+    final strings = GameStrings.current;
+    final phase = _phaseLabel(state);
+    return Positioned(
+      top: 6,
+      right: 8,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _chip('${strings.ui('turn')} ${_bloc.turn}  ·  $phase'),
+          const SizedBox(height: 4),
+          _chip(strings.ui('objective'), subtle: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(String text, {bool subtle = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: subtle ? 0.45 : 0.7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(text,
+          style: TextStyle(
+              fontSize: subtle ? 11 : 13,
+              color: subtle ? Colors.white70 : Colors.white)),
+    );
+  }
+
+  Widget _overlays(BuildContext context, BattleState state) {
     final activeUnit = switch (state) {
       UnitSelected(:final unit) => unit,
       UnitActionMenu(:final unit) => unit,
@@ -135,57 +176,32 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
       CombatPreviewState(:final unit) => unit,
       _ => null,
     };
+    final strings = GameStrings.current;
 
     return Stack(
       children: [
         if (activeUnit != null)
           Positioned(left: 8, top: 8, child: UnitInfoPanel(unit: activeUnit)),
         if (state is UnitActionMenu)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: ActionMenu(
-                  canAttack: state.attackableTargets.isNotEmpty,
-                  canPromote: state.canPromote),
-            ),
-          ),
-        if (state is ChoosingPromotion)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: PromotionMenu(state: state),
-            ),
-          ),
+          _bottom(ActionMenu(
+              canAttack: state.attackableTargets.isNotEmpty,
+              canPromote: state.canPromote)),
         if (state is ChoosingTarget)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _hintBar(context, 'Tap a highlighted enemy to attack'),
-            ),
-          ),
+          _bottom(_hintBar(context, strings.ui('selectTargetHint'))),
         if (state is CombatPreviewState)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: CombatPreviewPanel(forecast: state.forecast),
-            ),
-          ),
+          _bottom(CombatPreviewPanel(forecast: state.forecast)),
+        if (state is ChoosingPromotion) _bottom(PromotionMenu(state: state)),
         if (state is PlayerTurnIdle)
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: _Hint('Tap one of your (blue) units to act'),
-            ),
-          ),
+          _bottom(_Hint(strings.ui('tapUnitHint'))),
         if (state is BattleOver) _gameOver(context, state.playerWon),
       ],
     );
   }
+
+  Widget _bottom(Widget child) => Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(padding: const EdgeInsets.only(bottom: 16), child: child),
+      );
 
   Widget _hintBar(BuildContext context, String text) {
     return Card(
@@ -198,8 +214,9 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
             Text(text),
             const SizedBox(width: 12),
             TextButton(
-              onPressed: () => context.read<GameBloc>().add(const SelectionCancelled()),
-              child: const Text('Cancel'),
+              onPressed: () =>
+                  context.read<GameBloc>().add(const SelectionCancelled()),
+              child: Text(GameStrings.current.ui('cancel')),
             ),
           ],
         ),
@@ -208,6 +225,14 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
   }
 
   Widget _gameOver(BuildContext context, bool playerWon) {
+    final strings = GameStrings.current;
+    final lastChapter = !Campaign.hasNext(_index);
+    final title = !playerWon
+        ? strings.ui('defeat')
+        : (lastChapter ? strings.ui('campaignComplete') : strings.ui('victory'));
+    final titleColor =
+        playerWon ? const Color(0xFF5FD068) : const Color(0xFFD24B4B);
+
     return Positioned.fill(
       child: Container(
         color: Colors.black.withValues(alpha: 0.7),
@@ -215,20 +240,34 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                playerWon ? 'Victory!' : 'Defeat',
-                style: TextStyle(
-                  fontSize: 44,
-                  fontWeight: FontWeight.bold,
-                  color: playerWon ? const Color(0xFF5FD068) : const Color(0xFFD24B4B),
-                ),
-              ),
+              Text(title,
+                  style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: titleColor)),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () =>
-                    context.read<GameBloc>().add(GameStarted(widget.chapterAsset)),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Play Again'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (playerWon && !lastChapter)
+                    ElevatedButton.icon(
+                      onPressed: _nextChapter,
+                      icon: const Icon(Icons.skip_next),
+                      label: Text(strings.ui('nextChapter')),
+                    )
+                  else if (!playerWon)
+                    ElevatedButton.icon(
+                      onPressed: _restartChapter,
+                      icon: const Icon(Icons.refresh),
+                      label: Text(strings.ui('playAgain')),
+                    ),
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: const Icon(Icons.home),
+                    label: Text(strings.ui('toTitle')),
+                  ),
+                ],
               ),
             ],
           ),
@@ -249,10 +288,11 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
   }
 
   String _phaseLabel(GameState state) => switch (state) {
-        EnemyTurnBanner() || EnemyMoving() => 'Enemy Phase',
-        CombatAnimating(:final isEnemyPhase) =>
-          isEnemyPhase ? 'Enemy Phase' : 'Player Phase',
-        BattleState() => 'Player Phase',
+        EnemyTurnBanner() || EnemyMoving() => GameStrings.current.ui('enemyPhase'),
+        CombatAnimating(:final isEnemyPhase) => isEnemyPhase
+            ? GameStrings.current.ui('enemyPhase')
+            : GameStrings.current.ui('playerPhase'),
+        BattleState() => GameStrings.current.ui('playerPhase'),
         _ => '',
       };
 }

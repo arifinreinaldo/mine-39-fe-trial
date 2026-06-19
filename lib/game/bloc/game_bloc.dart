@@ -38,11 +38,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   late GameBoard _board;
   late CombatSystem _combat;
 
+  int _turn = 1;
+
+  /// Current player-turn number (1-based), for the HUD.
+  int get turn => _turn;
+
   Future<void> _onStarted(GameStarted event, Emitter<GameState> emit) async {
     emit(const GameLoading());
     try {
       _board = await repository.loadChapter(event.chapterAsset);
       _combat = CombatSystem(_board, rng: _rng);
+      _turn = 1;
       emit(PlayerTurnIdle(_board, showPhaseBanner: true));
     } catch (e) {
       emit(GameError('Failed to load chapter: $e'));
@@ -240,6 +246,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       for (final u in _board.units) {
         u.resetForNewTurn();
       }
+      _turn++;
       emit(PlayerTurnIdle(_board, showPhaseBanner: true));
       return;
     }

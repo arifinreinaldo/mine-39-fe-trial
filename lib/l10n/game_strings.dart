@@ -23,6 +23,8 @@ class GameStrings {
   String weaponTypeLabel(WeaponType w) => t('weaponType.${w.name}');
   String itemLabel(String id) => t('item.$id');
   String ui(String key) => t('ui.$key');
+  String skillLabel(ClassSkill s) =>
+      s == ClassSkill.none ? '' : t('skill.${s.name}');
 
   /// The active locale. Swap this (and trigger a rebuild) to relabel everything.
   static GameStrings current = indonesian;
@@ -111,12 +113,23 @@ const Map<String, String> _id = {
   'item.lunarBrace': 'Gelang Bulan',
   'item.solarBrace': 'Gelang Surya',
   'item.levelUp': 'Tingkat 10',
+  // Skills
+  'skill.greatShield': 'Perisai Agung',
+  'skill.pierce': 'Tembus',
+  'skill.silencer': 'Pukulan Maut',
+  'skill.sureShot': 'Bidikan Jitu',
+  'skill.slayer': 'Pembasmi',
+  'skill.summon': 'Pemanggilan',
+  'skill.crit15': 'Kritikal +15',
+  'skill.steal': 'Mencuri',
+  'skill.dance': 'Tarian',
   // UI
   'ui.attack': 'Serang',
   'ui.wait': 'Tunggu',
   'ui.cancel': 'Batal',
   'ui.promote': 'Naik Kelas',
   'ui.choosePromotion': 'Pilih kelas baru',
+  'ui.skill': 'Jurus',
 };
 
 /// English fallback (generic genre terms).
@@ -189,9 +202,19 @@ const Map<String, String> _en = {
   'item.lunarBrace': 'Lunar Brace',
   'item.solarBrace': 'Solar Brace',
   'item.levelUp': 'Level 10',
+  'skill.greatShield': 'Great Shield',
+  'skill.pierce': 'Pierce',
+  'skill.silencer': 'Silencer',
+  'skill.sureShot': 'Sure Shot',
+  'skill.slayer': 'Slayer',
+  'skill.summon': 'Summon',
+  'skill.crit15': 'Crit +15',
+  'skill.steal': 'Steal',
+  'skill.dance': 'Dance',
   'ui.attack': 'Attack',
   'ui.wait': 'Wait',
   'ui.cancel': 'Cancel',
   'ui.promote': 'Promote',
   'ui.choosePromotion': 'Choose a promotion',
+  'ui.skill': 'Skill',
 };

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../l10n/game_strings.dart';
 import '../bloc/game_bloc.dart';
 import '../bloc/game_event.dart';
 import '../logic/combat.dart';
@@ -34,10 +35,11 @@ class CombatPreviewPanel extends StatelessWidget {
                   crit: forecast.attackerCrit,
                   doubles: forecast.attackerDoubles,
                   effective: forecast.attackerEffective,
+                  skill: GameStrings.current.skillLabel(forecast.attackerSkill),
                   canAct: true,
                   highlight: Colors.lightBlueAccent,
                 ),
-                Container(width: 1, height: 104, color: Colors.white24),
+                Container(width: 1, height: 116, color: Colors.white24),
                 _side(
                   name: forecast.defender.name,
                   hp: '${forecast.defender.hp}/${forecast.defender.maxHp}',
@@ -46,6 +48,7 @@ class CombatPreviewPanel extends StatelessWidget {
                   crit: forecast.defenderCrit,
                   doubles: forecast.defenderDoubles,
                   effective: forecast.defenderEffective,
+                  skill: GameStrings.current.skillLabel(forecast.defenderSkill),
                   canAct: forecast.defenderCanCounter,
                   highlight: Colors.redAccent,
                 ),
@@ -83,6 +86,7 @@ class CombatPreviewPanel extends StatelessWidget {
     required int crit,
     required bool doubles,
     required bool effective,
+    required String skill,
     required bool canAct,
     required Color highlight,
   }) {
@@ -112,6 +116,12 @@ class CombatPreviewPanel extends StatelessWidget {
           ] else
             const Text('No counter',
                 style: TextStyle(fontSize: 12, color: Colors.white54)),
+          if (skill.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text('${GameStrings.current.ui('skill')}: $skill',
+                  style: const TextStyle(fontSize: 11, color: Colors.white70)),
+            ),
         ],
       ),
     );

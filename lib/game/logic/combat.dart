@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../../data/models/game_board.dart';
 import '../../data/models/unit.dart';
+import '../../data/models/unit_class.dart';
 import '../../data/models/weapon.dart';
 import 'movement.dart';
 
@@ -16,6 +17,9 @@ class CombatStrike {
     required this.damage,
     required this.defenderHpAfter,
     required this.defenderDied,
+    this.blocked = false,
+    this.pierced = false,
+    this.lethal = false,
   });
 
   final Unit attacker;
@@ -25,6 +29,11 @@ class CombatStrike {
   final int damage;
   final int defenderHpAfter;
   final bool defenderDied;
+
+  /// Skill procs on this strike (for animation labels / log).
+  final bool blocked; // defender's Great Shield negated the hit
+  final bool pierced; // attacker's Pierce / Sure Shot ignored defense
+  final bool lethal; // attacker's Silencer was an instant kill
 }
 
 /// The full resolution of one combat: the ordered strikes, who died, and the
@@ -63,6 +72,8 @@ class CombatForecast {
     required this.defenderDoubles,
     required this.attackerEffective,
     required this.defenderEffective,
+    required this.attackerSkill,
+    required this.defenderSkill,
   });
 
   final Unit attacker;
@@ -78,6 +89,8 @@ class CombatForecast {
   final bool defenderDoubles;
   final bool attackerEffective;
   final bool defenderEffective;
+  final ClassSkill attackerSkill;
+  final ClassSkill defenderSkill;
 }
 
 /// Combat math and resolution.
@@ -109,7 +122,9 @@ class CombatSystem {
   bool isEffective(Unit a, Unit d) =>
       a.weapon.effectiveVs.any(d.unitClass.traits.contains);
 
-  int damage(Unit a, Unit d) {
+  /// [ignoreDefense] models Pierce / Sure Shot: the defender's defense (or
+  /// resistance) and terrain shield are skipped.
+  int damage(Unit a, Unit d, {bool ignoreDefense = false}) {
     final tri = Weapon.triangle(a.weapon.type, d.weapon.type);
     final triMight = switch (tri) {
       TriangleResult.advantage => 1,
@@ -118,13 +133,19 @@ class CombatSystem {
     };
     final might =
         a.weapon.might * (isEffective(a, d) ? Weapon.effectiveMultiplier : 1);
-    final base = a.weapon.isMagic ? a.magic - d.resistance : a.strength - d.defense;
-    final raw = base + might + triMight - board.tileAt(d.position).defenseBonus;
+    final defStat =
+        ignoreDefense ? 0 : (a.weapon.isMagic ? d.resistance : d.defense);
+    final terrainDef = ignoreDefense ? 0 : board.tileAt(d.position).defenseBonus;
+    final raw = a.attackPower - defStat + might + triMight - terrainDef;
     return raw.clamp(0, 99);
   }
 
-  int critChance(Unit a, Unit d) =>
-      (a.weapon.crit + a.skill ~/ 2 - d.luck).clamp(0, 100);
+  int critChance(Unit a, Unit d) {
+    final skillBonus = a.unitClass.skill == ClassSkill.crit15 ? 15 : 0;
+    return (a.weapon.crit + a.skill ~/ 2 + skillBonus - d.luck).clamp(0, 100);
+  }
+
+  bool _proc(int percent) => _rng.nextInt(100) < percent;
 
   /// Doubling uses *attack speed* (speed minus the weight-over-CON penalty),
   /// so heavy weapons can cost a unit its follow-up.
@@ -146,6 +167,8 @@ class CombatSystem {
       attackerDoubles: doubles(a, d),
       attackerEffective: isEffective(a, d),
       defenderEffective: defCanCounter && isEffective(d, a),
+      attackerSkill: a.unitClass.skill,
+      defenderSkill: d.unitClass.skill,
       defenderCanCounter: defCanCounter,
       defenderDamage: defCanCounter ? damage(d, a) : 0,
       defenderHit: defCanCounter ? hitChance(d, a) : 0,
@@ -164,14 +187,33 @@ class CombatSystem {
       if (!atk.isAlive || !def.isAlive) return;
       final didHit = _rng.nextInt(100) < hitChance(atk, def);
       var didCrit = false;
+      var blocked = false;
+      var pierced = false;
+      var lethal = false;
       var dmg = 0;
+
       if (didHit) {
-        didCrit = _rng.nextInt(100) < critChance(atk, def);
-        dmg = damage(atk, def);
-        if (didCrit) dmg *= 3;
-        def.hp -= dmg;
-        def.clampHp();
+        // Defender's Great Shield (skill%) can negate the blow entirely.
+        if (def.unitClass.skill == ClassSkill.greatShield && _proc(def.skill)) {
+          blocked = true;
+        } else {
+          // Pierce / Sure Shot (skill%) ignore the defender's defense.
+          pierced = (atk.unitClass.skill == ClassSkill.pierce ||
+                  atk.unitClass.skill == ClassSkill.sureShot) &&
+              _proc(atk.skill);
+          didCrit = _rng.nextInt(100) < critChance(atk, def);
+          dmg = damage(atk, def, ignoreDefense: pierced);
+          if (didCrit) dmg *= 3;
+          // Silencer / lethality ((skill/2)%) instantly fells the target.
+          if (atk.unitClass.skill == ClassSkill.silencer && _proc(atk.skill ~/ 2)) {
+            lethal = true;
+            dmg = def.hp;
+          }
+          def.hp -= dmg;
+          def.clampHp();
+        }
       }
+
       strikes.add(CombatStrike(
         attacker: atk,
         defender: def,
@@ -180,6 +222,9 @@ class CombatSystem {
         damage: dmg,
         defenderHpAfter: def.hp,
         defenderDied: !def.isAlive,
+        blocked: blocked,
+        pierced: pierced,
+        lethal: lethal,
       ));
     }
 

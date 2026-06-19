@@ -10,6 +10,7 @@ import '../bloc/game_event.dart';
 import '../bloc/game_state.dart';
 import '../logic/combat.dart';
 import '../painters/board_painter.dart';
+import '../../l10n/game_strings.dart';
 
 /// The interactive board. It paints via [BoardPainter] and owns the imperative
 /// animation logic: when the bloc enters a "moving" or "combat" state, the view
@@ -86,12 +87,7 @@ class _GameBoardViewState extends State<GameBoardView>
       await _lunge(strike.attacker, strike.defender);
       if (strike.hit) _displayHp[strike.defender.id] = strike.defenderHpAfter;
 
-      final text = !strike.hit
-          ? 'Miss'
-          : (strike.crit ? 'CRIT ${strike.damage}!' : '-${strike.damage}');
-      final color = !strike.hit
-          ? Colors.white
-          : (strike.crit ? const Color(0xFFFFC107) : Colors.amberAccent);
+      final (text, color) = _strikeLabel(strike);
       await _tween((t) {
         _floating = FloatingLabel(
             tile: strike.defender.position, text: text, color: color, t: t);
@@ -105,6 +101,29 @@ class _GameBoardViewState extends State<GameBoardView>
       setState(() {});
       context.read<GameBloc>().add(const CombatAnimationCompleted());
     }
+  }
+
+  /// The floating label (text + colour) for a single strike, including skill
+  /// procs (Great Shield / Pierce / Silencer) with their localized names.
+  (String, Color) _strikeLabel(CombatStrike strike) {
+    final strings = GameStrings.current;
+    if (!strike.hit) return ('Miss', Colors.white);
+    if (strike.blocked) {
+      return ('${strings.skillLabel(strike.defender.unitClass.skill)}!',
+          Colors.lightBlueAccent);
+    }
+    if (strike.lethal) {
+      return ('${strings.skillLabel(strike.attacker.unitClass.skill)}!',
+          Colors.redAccent);
+    }
+    if (strike.crit) {
+      return ('CRIT ${strike.damage}!', const Color(0xFFFFC107));
+    }
+    if (strike.pierced) {
+      return ('${strings.skillLabel(strike.attacker.unitClass.skill)} -${strike.damage}',
+          Colors.orangeAccent);
+    }
+    return ('-${strike.damage}', Colors.amberAccent);
   }
 
   Future<void> _lunge(Unit attacker, Unit defender) async {

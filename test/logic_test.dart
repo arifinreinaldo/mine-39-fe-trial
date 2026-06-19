@@ -415,4 +415,126 @@ void main() {
       expect(u.defense, 7); // +2 from the bonus
     });
   });
+
+  group('class skills', () {
+    test('crit +15 skill raises crit chance', () {
+      final board = buildBoard([
+        [0, 0],
+      ], []);
+      final swordmaster = makeUnit(
+        id: 'sm',
+        unitClass: UnitClass.swordmaster, // has crit15
+        faction: Faction.player,
+        weapon: Weapon.byId('swiftEdge'), // crit 25
+        x: 0,
+        y: 0,
+        skill: 10,
+      );
+      final target = makeUnit(
+        id: 't',
+        unitClass: UnitClass.soldier,
+        faction: Faction.enemy,
+        weapon: Weapon.byId('ironLance'),
+        x: 1,
+        y: 0,
+      );
+      board.units.addAll([swordmaster, target]);
+      final combat = CombatSystem(board);
+      // 25 (weapon) + 5 (skill/2) + 15 (crit15) - 0 (luck) = 45
+      expect(combat.critChance(swordmaster, target), 45);
+    });
+
+    test('Pierce / ignore-defense raises damage', () {
+      final board = buildBoard([
+        [0, 0],
+      ], []);
+      final wyvern = makeUnit(
+        id: 'wk',
+        unitClass: UnitClass.wyvernKnight,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironLance'),
+        x: 0,
+        y: 0,
+        strength: 12,
+      );
+      final tank = makeUnit(
+        id: 'tk',
+        unitClass: UnitClass.knight,
+        faction: Faction.enemy,
+        weapon: Weapon.byId('ironLance'),
+        x: 1,
+        y: 0,
+        defense: 10,
+      );
+      board.units.addAll([wyvern, tank]);
+      final combat = CombatSystem(board);
+      expect(combat.damage(wyvern, tank, ignoreDefense: true),
+          greaterThan(combat.damage(wyvern, tank)));
+    });
+
+    test('Great Shield can negate an incoming hit', () {
+      final board = buildBoard([
+        [0, 0],
+      ], []);
+      final attacker = makeUnit(
+        id: 'atk',
+        unitClass: UnitClass.myrmidon,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironSword'),
+        x: 0,
+        y: 0,
+        strength: 12,
+        skill: 50, // guarantees the hit lands
+      );
+      final general = makeUnit(
+        id: 'gen',
+        unitClass: UnitClass.general, // has Great Shield
+        faction: Faction.enemy,
+        weapon: Weapon.byId('ironLance'),
+        x: 1,
+        y: 0,
+        hp: 30,
+        defense: 8,
+      );
+      general.skill = 100; // forces the Great Shield proc
+      board.units.addAll([attacker, general]);
+      final combat = CombatSystem(board, rng: Random(3));
+
+      final before = general.hp;
+      final result = combat.resolve(attacker, general);
+      expect(result.strikes.first.blocked, isTrue);
+      expect(general.hp, before); // took no damage
+    });
+
+    test('Silencer can instantly fell the target', () {
+      final board = buildBoard([
+        [0, 0],
+      ], []);
+      final assassin = makeUnit(
+        id: 'asn',
+        unitClass: UnitClass.assassin, // has Silencer
+        faction: Faction.player,
+        weapon: Weapon.byId('ironSword'),
+        x: 0,
+        y: 0,
+        skill: 200, // forces the hit and the (skill/2)% proc
+      );
+      final victim = makeUnit(
+        id: 'vic',
+        unitClass: UnitClass.soldier,
+        faction: Faction.enemy,
+        weapon: Weapon.byId('ironLance'),
+        x: 1,
+        y: 0,
+        hp: 20,
+        defense: 30, // normal damage would be ~0, so only Silencer can kill
+      );
+      board.units.addAll([assassin, victim]);
+      final combat = CombatSystem(board, rng: Random(5));
+
+      final result = combat.resolve(assassin, victim);
+      expect(result.strikes.first.lethal, isTrue);
+      expect(victim.isAlive, isFalse);
+    });
+  });
 }

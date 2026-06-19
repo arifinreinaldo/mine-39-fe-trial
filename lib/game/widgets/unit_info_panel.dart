@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/unit.dart';
+import '../../data/models/unit_class.dart';
 import '../../l10n/game_strings.dart';
 
 /// Compact read-out of the active unit's stats, shown while it is selected.
@@ -52,6 +53,11 @@ class UnitInfoPanel extends StatelessWidget {
                 '  (Mt ${unit.weapon.might} / Hit ${unit.weapon.hit}'
                 '${unit.weapon.crit > 0 ? ' / Crit ${unit.weapon.crit}' : ''})',
                 style: const TextStyle(fontSize: 11, color: Colors.white70)),
+            if (unit.unitClass.skill != ClassSkill.none) ...[
+              const SizedBox(height: 2),
+              Text('${strings.ui('skill')}: ${strings.skillLabel(unit.unitClass.skill)}',
+                  style: const TextStyle(fontSize: 11, color: Color(0xFFFFD27A))),
+            ],
           ],
         ),
       ),

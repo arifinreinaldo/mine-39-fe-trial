@@ -86,9 +86,10 @@ A release web build is produced with `flutter build web` (output in
 ## Verified
 
 - `flutter analyze` → **No issues found**
-- `flutter test` → **14/14 passing** (movement flood-fill, terrain cost, water
+- `flutter test` → **18/18 passing** (movement flood-fill, terrain cost, water
   blocking, weapon triangle, doubling, lethal combat, AI targeting, ×3
-  effectiveness, weapon-weight attack speed, stat-cap clamping, and promotion)
+  effectiveness, weapon-weight attack speed, stat-cap clamping, promotion, and
+  class skills — crit+15 / Pierce / Great Shield / Silencer)
 - `flutter build web --release` → builds successfully
 
 ## Class system & localization
@@ -98,6 +99,9 @@ A release web build is produced with `flutter build web` (output in
   branching promotion tree, per-class stat caps, and CON. See `unit_class.dart`.
 - **×3 effectiveness** (bows vs fliers, Hammer vs armor), **CON vs weapon
   weight → attack speed**, and **cap clamping** on level-up are all live.
+- **Class skills** proc in combat: +15% crit, **Pierce**/**Sure Shot** (ignore
+  defense), **Great Shield** (negate a hit), **Silencer** (instant kill) — shown
+  in the forecast and as floating labels. Their names are localized too.
 - **Branching promotion is playable**: a unit at Lv ≥ 10 holding the right seal
   gets a **Promote** action → a 1-of-2 (3 for trainees) class choice with stat
   bonuses. In Chapter 1, Kira/Tora (Hero Crest) and Bram (Knight Crest) start
@@ -107,8 +111,6 @@ A release web build is produced with `flutter build web` (output in
 
 ## Deliberately left as next steps
 
-- **Class skills** — Great Shield / Pierce / Sure Shot / Silencer are encoded on
-  classes but not yet applied in combat.
 - **Richer leveling** — level-up is deterministic (`GameBloc._levelUp`); a full
   version would roll per-stat growth rates.
 - **Fog of war, healing/staff units, full inventory, magic trinity.**

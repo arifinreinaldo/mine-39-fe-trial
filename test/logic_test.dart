@@ -10,6 +10,7 @@ import 'package:ember_tactics/game/logic/combat.dart';
 import 'package:ember_tactics/game/logic/enemy_ai.dart';
 import 'package:ember_tactics/game/logic/movement.dart';
 import 'package:ember_tactics/game/logic/promotion.dart';
+import 'package:ember_tactics/game/logic/support.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 GameBoard buildBoard(List<List<int>> terrain, List<Unit> units) {
@@ -535,6 +536,109 @@ void main() {
       final result = combat.resolve(assassin, victim);
       expect(result.strikes.first.lethal, isTrue);
       expect(victim.isAlive, isFalse);
+    });
+  });
+
+  group('support / healing', () {
+    test('staff restores base + magic and clamps to max HP', () {
+      final board = buildBoard([
+        [0, 0],
+      ], []);
+      final cleric = makeUnit(
+        id: 'c',
+        unitClass: UnitClass.cleric,
+        faction: Faction.player,
+        weapon: Weapon.byId('healStaff'), // heal 10
+        x: 0,
+        y: 0,
+        magic: 7,
+      );
+      final ally = makeUnit(
+        id: 'a',
+        unitClass: UnitClass.knight,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironLance'),
+        x: 1,
+        y: 0,
+        hp: 30,
+      );
+      ally.hp = 10;
+      board.units.addAll([cleric, ally]);
+
+      expect(cleric.weapon.isStaff, isTrue);
+      expect(HealSystem.staffHealAmount(cleric), 17); // 10 + magic 7
+      expect(HealSystem.heal(ally, 17), 17);
+      expect(ally.hp, 27);
+      expect(HealSystem.heal(ally, 100), 3); // clamped to 30
+      expect(ally.hp, 30);
+    });
+
+    test('heal targets are only wounded, in-range allies', () {
+      final board = buildBoard([
+        [0, 0],
+        [0, 0],
+      ], []);
+      final cleric = makeUnit(
+        id: 'c',
+        unitClass: UnitClass.cleric,
+        faction: Faction.player,
+        weapon: Weapon.byId('healStaff'),
+        x: 0,
+        y: 0,
+      );
+      final hurt = makeUnit(
+        id: 'h',
+        unitClass: UnitClass.knight,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironLance'),
+        x: 1,
+        y: 0,
+        hp: 30,
+      )..hp = 10;
+      final fullHp = makeUnit(
+        id: 'f',
+        unitClass: UnitClass.archer,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironBow'),
+        x: 0,
+        y: 1,
+      );
+      final woundedEnemy = makeUnit(
+        id: 'e',
+        unitClass: UnitClass.fighter,
+        faction: Faction.enemy,
+        weapon: Weapon.byId('ironAxe'),
+        x: 1,
+        y: 1,
+        hp: 20,
+      )..hp = 5;
+      board.units.addAll([cleric, hurt, fullHp, woundedEnemy]);
+
+      expect(HealSystem.healTargets(cleric, board).map((u) => u.id), ['h']);
+    });
+
+    test('vulnerary needs the item and a wound', () {
+      final board = buildBoard([
+        [0],
+      ], []);
+      final u = makeUnit(
+        id: 'u',
+        unitClass: UnitClass.myrmidon,
+        faction: Faction.player,
+        weapon: Weapon.byId('ironSword'),
+        x: 0,
+        y: 0,
+        hp: 20,
+      );
+      board.units.add(u);
+
+      expect(HealSystem.canUseVulnerary(u), isFalse); // no item
+      u.heldItems.add(HealSystem.vulnerary);
+      expect(HealSystem.canUseVulnerary(u), isFalse); // full HP
+      u.hp = 10;
+      expect(HealSystem.canUseVulnerary(u), isTrue);
+      expect(HealSystem.heal(u, HealSystem.vulneraryHeal), 10);
+      expect(u.hp, 20);
     });
   });
 }

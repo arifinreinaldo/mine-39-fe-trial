@@ -24,6 +24,7 @@ class Weapon {
     required this.maxRange,
     this.weight = 0,
     this.effectiveVs = const <UnitTrait>{},
+    this.heal = 0,
   });
 
   final String name;
@@ -36,7 +37,12 @@ class Weapon {
   final int weight;
   final Set<UnitTrait> effectiveVs;
 
+  /// Base HP restored when used as a healing staff. A weapon with [heal] > 0 is
+  /// a staff: it cannot attack, only mend allies.
+  final int heal;
+
   bool get isMagic => type == WeaponType.magic;
+  bool get isStaff => heal > 0;
 
   bool reaches(int distance) => distance >= minRange && distance <= maxRange;
 
@@ -65,6 +71,7 @@ class Weapon {
     'hammer': Weapon(name: 'Hammer', type: WeaponType.axe, might: 10, hit: 65, crit: 0, minRange: 1, maxRange: 1, weight: 12, effectiveVs: {UnitTrait.armored}),
     'ironBow': Weapon(name: 'Iron Bow', type: WeaponType.bow, might: 6, hit: 85, crit: 0, minRange: 2, maxRange: 2, weight: 5, effectiveVs: {UnitTrait.flying}),
     'flame': Weapon(name: 'Flame', type: WeaponType.magic, might: 5, hit: 90, crit: 0, minRange: 1, maxRange: 2, weight: 4),
+    'healStaff': Weapon(name: 'Heal', type: WeaponType.magic, might: 0, hit: 100, crit: 0, minRange: 1, maxRange: 1, weight: 0, heal: 10),
   };
 
   static Weapon byId(String id) => catalogue[id] ?? catalogue['ironSword']!;

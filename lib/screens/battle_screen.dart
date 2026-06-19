@@ -172,6 +172,7 @@ class _BattleScreenState extends State<BattleScreen> {
       UnitSelected(:final unit) => unit,
       UnitActionMenu(:final unit) => unit,
       ChoosingTarget(:final unit) => unit,
+      ChoosingHealTarget(:final unit) => unit,
       ChoosingPromotion(:final unit) => unit,
       CombatPreviewState(:final unit) => unit,
       _ => null,
@@ -185,9 +186,13 @@ class _BattleScreenState extends State<BattleScreen> {
         if (state is UnitActionMenu)
           _bottom(ActionMenu(
               canAttack: state.attackableTargets.isNotEmpty,
-              canPromote: state.canPromote)),
+              canPromote: state.canPromote,
+              canHeal: state.canHeal,
+              canUseItem: state.canUseItem)),
         if (state is ChoosingTarget)
           _bottom(_hintBar(context, strings.ui('selectTargetHint'))),
+        if (state is ChoosingHealTarget)
+          _bottom(_hintBar(context, strings.ui('selectHealHint'))),
         if (state is CombatPreviewState)
           _bottom(CombatPreviewPanel(forecast: state.forecast)),
         if (state is ChoosingPromotion) _bottom(PromotionMenu(state: state)),

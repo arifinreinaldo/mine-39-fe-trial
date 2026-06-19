@@ -47,31 +47,36 @@ that the BLoC interprets by context:
    advance toward the nearest player.
 
 Plus lightweight **animation** (units glide along their path, attacker lunge,
-floating damage/crit/miss numbers, HP bars), a fit-to-screen responsive board,
-and a victory/defeat screen.
+floating damage/crit/miss/heal numbers, HP bars), a fit-to-screen responsive
+board, a **title screen**, a **2-chapter campaign** with victory→next-chapter
+progression, a **turn/objective HUD**, and a victory/defeat screen.
 
 ## Architecture
 
 ```
 lib/
   data/
-    models/            # pure Dart, no Flutter: terrain, tile, weapon,
-                       # unit_class, unit, game_board
+    models/            # pure Dart, no Flutter: terrain, tile, unit_trait,
+                       # weapon, unit_class, unit, game_board
     repositories/      # chapter_repository.dart — loads JSON maps
+    campaign.dart      # ordered list of chapters
   game/
-    logic/             # movement (BFS/Dijkstra), combat, enemy_ai  (pure Dart)
+    logic/             # movement, combat, enemy_ai, promotion, support (pure Dart)
     bloc/              # game_event, game_state, game_bloc (source of truth)
     painters/          # board_painter.dart (CustomPainter)
-    widgets/           # game_board_view (touch + animation), panels
+    widgets/           # game_board_view (touch + animation), panels, menus
+  l10n/
+    game_strings.dart  # swappable id/en strings (classes, skills, items, UI)
   screens/
-    battle_screen.dart
+    title_screen.dart, battle_screen.dart
   main.dart
-assets/maps/chapter_1.json   # the map + unit placements (data-driven)
-test/logic_test.dart         # movement / combat / AI unit tests
+assets/maps/chapter_1.json, chapter_2.json   # maps + rosters (data-driven)
+test/logic_test.dart                          # 20 pure-logic tests
 ```
 
-Maps and units are **data**, not code — edit `assets/maps/chapter_1.json`
-(`tileLegend` documents the terrain ids) to change the battlefield or roster.
+Maps and units are **data**, not code — edit `assets/maps/*.json`
+(`tileLegend` documents the terrain ids) to change a battlefield or roster, and
+list new chapters in `lib/data/campaign.dart`.
 
 ## Run it
 
@@ -86,10 +91,11 @@ A release web build is produced with `flutter build web` (output in
 ## Verified
 
 - `flutter analyze` → **No issues found**
-- `flutter test` → **18/18 passing** (movement flood-fill, terrain cost, water
+- `flutter test` → **21/21 passing** (movement flood-fill, terrain cost, water
   blocking, weapon triangle, doubling, lethal combat, AI targeting, ×3
-  effectiveness, weapon-weight attack speed, stat-cap clamping, promotion, and
-  class skills — crit+15 / Pierce / Great Shield / Silencer)
+  effectiveness, weapon-weight attack speed, stat-cap clamping, promotion,
+  class skills — crit+15 / Pierce / Great Shield / Silencer — and healing:
+  staff/magic, target filtering, vulnerary)
 - `flutter build web --release` → builds successfully
 
 ## Class system & localization
@@ -109,12 +115,21 @@ A release web build is produced with `flutter build web` (output in
 - Display names are decoupled from stable class IDs via `l10n/game_strings.dart`.
   **Indonesian is the default**; tap the 🌐 toolbar button to swap to English.
 
+## Support & campaign
+
+- **Healing** (`game/logic/support.dart`): a cleric/staff unit gets a **Heal**
+  action to mend an adjacent wounded ally (staff base + magic), and any unit
+  carrying a **vulnerary** can self-heal via the **Item** action. Chapter 2
+  fields the cleric *Sari*. Staff users can't attack — they only mend.
+- **Campaign**: `Campaign.chapters` drives a 2-chapter run; winning advances to
+  the next chapter and the last win shows **Campaign Complete**.
+
 ## Deliberately left as next steps
 
 - **Richer leveling** — level-up is deterministic (`GameBloc._levelUp`); a full
   version would roll per-stat growth rates.
-- **Fog of war, healing/staff units, full inventory, magic trinity.**
-- **Multiple chapters & a dialogue/story layer.**
+- **Cross-chapter roster persistence** (units currently reset each chapter).
+- **Fog of war, full inventory, the magic trinity, a dialogue/story layer.**
 - **Pinch-zoom / camera pan** (board currently auto-fits the screen).
 - **Sprite art** — units are drawn as labelled tokens; swap `BoardPainter` for
   sprite sheets (the one place a tool like Flame could later help).

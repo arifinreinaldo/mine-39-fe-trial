@@ -3,7 +3,7 @@ import 'dart:math';
 import '../../data/models/unit_class.dart';
 
 /// Player-chosen action from the post-move menu.
-enum BattleAction { attack, promote, wait }
+enum BattleAction { attack, heal, item, promote, wait }
 
 /// Events fed into [GameBloc].
 ///
@@ -56,6 +56,11 @@ class MovementAnimationCompleted extends GameEvent {
 /// Sent by the view once a combat (strike-by-strike) animation has finished.
 class CombatAnimationCompleted extends GameEvent {
   const CombatAnimationCompleted();
+}
+
+/// Sent by the view once a heal effect has finished animating.
+class HealAnimationCompleted extends GameEvent {
+  const HealAnimationCompleted();
 }
 
 /// Internal: drive the enemy phase one unit at a time.

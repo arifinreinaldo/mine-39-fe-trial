@@ -73,11 +73,35 @@ class UnitActionMenu extends BattleState {
     required this.origin,
     required this.attackableTargets,
     required this.canPromote,
+    required this.canHeal,
+    required this.canUseItem,
   });
   final Unit unit;
   final Point<int> origin;
   final List<Unit> attackableTargets;
   final bool canPromote;
+  final bool canHeal;
+  final bool canUseItem;
+}
+
+/// Choosing a wounded ally to heal with a staff.
+class ChoosingHealTarget extends BattleState {
+  const ChoosingHealTarget(
+    super.board, {
+    required this.unit,
+    required this.origin,
+    required this.targets,
+  });
+  final Unit unit;
+  final Point<int> origin;
+  final List<Unit> targets;
+}
+
+/// A heal effect is animating over [target] (+[amount] HP).
+class HealAnimating extends BattleState {
+  const HealAnimating(super.board, {required this.target, required this.amount});
+  final Unit target;
+  final int amount;
 }
 
 /// Choosing which class to promote into (1-of-2, or 3 for trainees).

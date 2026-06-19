@@ -9,6 +9,7 @@ import '../logic/combat.dart';
 import '../logic/enemy_ai.dart';
 import '../logic/movement.dart';
 import '../logic/promotion.dart';
+import '../logic/support.dart';
 import 'game_event.dart';
 import 'game_state.dart';
 
@@ -29,6 +30,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<EndTurnRequested>(_onEndTurnRequested);
     on<MovementAnimationCompleted>(_onMovementDone);
     on<CombatAnimationCompleted>(_onCombatDone);
+    on<HealAnimationCompleted>(_onHealDone);
     on<AdvanceAiRequested>(_onAdvanceAi);
   }
 
@@ -106,6 +108,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
       return;
     }
+
+    if (current is ChoosingHealTarget) {
+      final tapped = _board.unitAt(pos);
+      if (tapped != null && current.targets.contains(tapped)) {
+        final healed =
+            HealSystem.heal(tapped, HealSystem.staffHealAmount(current.unit));
+        current.unit.hasActed = true;
+        emit(HealAnimating(_board, target: tapped, amount: healed));
+      }
+      return;
+    }
     // Other states ignore raw taps (use the on-screen buttons).
   }
 
@@ -120,6 +133,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             unit: current.unit,
             origin: current.origin,
             targets: current.attackableTargets));
+      case BattleAction.heal:
+        final targets = HealSystem.healTargets(current.unit, _board);
+        if (targets.isEmpty) return;
+        emit(ChoosingHealTarget(_board,
+            unit: current.unit, origin: current.origin, targets: targets));
+      case BattleAction.item:
+        if (!HealSystem.canUseVulnerary(current.unit)) return;
+        final healed =
+            HealSystem.heal(current.unit, HealSystem.vulneraryHeal);
+        current.unit.heldItems.remove(HealSystem.vulnerary);
+        current.unit.hasActed = true;
+        emit(HealAnimating(_board, target: current.unit, amount: healed));
       case BattleAction.promote:
         final options = PromotionSystem.optionsFor(current.unit);
         if (options.isEmpty) return;
@@ -162,6 +187,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     } else if (current is ChoosingTarget) {
       emit(_actionMenuFor(current.unit, current.origin));
     } else if (current is ChoosingPromotion) {
+      emit(_actionMenuFor(current.unit, current.origin));
+    } else if (current is ChoosingHealTarget) {
       emit(_actionMenuFor(current.unit, current.origin));
     } else if (current is CombatPreviewState) {
       emit(ChoosingTarget(_board,
@@ -222,6 +249,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     } else {
       _afterPlayerAction(emit);
     }
+  }
+
+  void _onHealDone(HealAnimationCompleted event, Emitter<GameState> emit) {
+    if (state is! HealAnimating) return;
+    _afterPlayerAction(emit);
   }
 
   // ---- Enemy phase ----------------------------------------------------------
@@ -290,14 +322,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           unit: unit,
           origin: origin,
           attackableTargets: _targetsFor(unit),
-          canPromote: PromotionSystem.canPromote(unit));
+          canPromote: PromotionSystem.canPromote(unit),
+          canHeal: HealSystem.healTargets(unit, _board).isNotEmpty,
+          canUseItem: HealSystem.canUseVulnerary(unit));
 
-  List<Unit> _targetsFor(Unit unit) => _board.units
-      .where((u) =>
-          u.isAlive &&
-          u.faction != unit.faction &&
-          unit.weapon.reaches(MovementSystem.manhattan(unit.position, u.position)))
-      .toList();
+  // Staff users cannot attack — they mend, not fight.
+  List<Unit> _targetsFor(Unit unit) {
+    if (unit.weapon.isStaff) return const [];
+    return _board.units
+        .where((u) =>
+            u.isAlive &&
+            u.faction != unit.faction &&
+            unit.weapon
+                .reaches(MovementSystem.manhattan(unit.position, u.position)))
+        .toList();
+  }
 
   void _commitPosition(Unit unit, List<Point<int>> path) {
     if (path.isEmpty) return;

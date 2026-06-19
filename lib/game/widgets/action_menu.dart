@@ -8,10 +8,18 @@ import '../bloc/game_event.dart';
 /// Post-move menu: Attack (only when a target is in range), Promote (only when
 /// eligible), Wait, or Cancel (which sends the unit back to where it started).
 class ActionMenu extends StatelessWidget {
-  const ActionMenu({super.key, required this.canAttack, required this.canPromote});
+  const ActionMenu({
+    super.key,
+    required this.canAttack,
+    required this.canPromote,
+    required this.canHeal,
+    required this.canUseItem,
+  });
 
   final bool canAttack;
   final bool canPromote;
+  final bool canHeal;
+  final bool canUseItem;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +37,26 @@ class ActionMenu extends StatelessWidget {
                 onPressed: () => bloc.add(const ActionSelected(BattleAction.attack)),
                 icon: const Icon(Icons.gps_fixed),
                 label: Text(strings.ui('attack')),
+              ),
+              const SizedBox(width: 8),
+            ],
+            if (canHeal) ...[
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3E8E5A)),
+                onPressed: () => bloc.add(const ActionSelected(BattleAction.heal)),
+                icon: const Icon(Icons.healing),
+                label: Text(strings.ui('heal')),
+              ),
+              const SizedBox(width: 8),
+            ],
+            if (canUseItem) ...[
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3E7A8E)),
+                onPressed: () => bloc.add(const ActionSelected(BattleAction.item)),
+                icon: const Icon(Icons.local_drink),
+                label: Text(strings.ui('item')),
               ),
               const SizedBox(width: 8),
             ],

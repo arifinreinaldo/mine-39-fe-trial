@@ -151,7 +151,21 @@ class _GameBoardViewState extends State<GameBoardView>
       _playMove(state.unit, state.path);
     } else if (state is CombatAnimating) {
       _playCombat(state.result);
+    } else if (state is HealAnimating) {
+      _playHeal(state.target, state.amount);
     }
+  }
+
+  Future<void> _playHeal(Unit target, int amount) async {
+    await _tween((t) {
+      _floating = FloatingLabel(
+          tile: target.position,
+          text: '+$amount',
+          color: const Color(0xFF7CF2A0),
+          t: t);
+    }, const Duration(milliseconds: 480));
+    _floating = null;
+    if (mounted) context.read<GameBloc>().add(const HealAnimationCompleted());
   }
 
   void _handleTap(GameBoard board, Offset localPosition) {
@@ -174,11 +188,16 @@ class _GameBoardViewState extends State<GameBoardView>
             state is UnitSelected ? state.movementTiles : const <Point<int>>{};
         final attackTiles =
             state is UnitSelected ? state.attackTiles : const <Point<int>>{};
-        final targets = state is ChoosingTarget ? state.targets : const <Unit>[];
+        final targets = switch (state) {
+          ChoosingTarget(:final targets) => targets,
+          ChoosingHealTarget(:final targets) => targets,
+          _ => const <Unit>[],
+        };
         final activeUnit = switch (state) {
           UnitSelected(:final unit) => unit,
           UnitActionMenu(:final unit) => unit,
           ChoosingTarget(:final unit) => unit,
+          ChoosingHealTarget(:final unit) => unit,
           CombatPreviewState(:final unit) => unit,
           _ => null,
         };

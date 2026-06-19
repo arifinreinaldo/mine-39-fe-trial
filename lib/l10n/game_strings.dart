@@ -120,7 +120,7 @@ const Map<String, String> _id = {
   'skill.sureShot': 'Bidikan Jitu',
   'skill.slayer': 'Pembasmi',
   'skill.summon': 'Pemanggilan',
-  'skill.crit15': 'Kritikal +15',
+  'skill.crit15': 'Naluri Pembunuh',
   'skill.steal': 'Mencuri',
   'skill.dance': 'Tarian',
   // UI
@@ -208,7 +208,7 @@ const Map<String, String> _en = {
   'skill.sureShot': 'Sure Shot',
   'skill.slayer': 'Slayer',
   'skill.summon': 'Summon',
-  'skill.crit15': 'Crit +15',
+  'skill.crit15': 'Killer Instinct',
   'skill.steal': 'Steal',
   'skill.dance': 'Dance',
   'ui.attack': 'Attack',

@@ -8,6 +8,7 @@ import '../../data/repositories/chapter_repository.dart';
 import '../logic/combat.dart';
 import '../logic/enemy_ai.dart';
 import '../logic/movement.dart';
+import '../logic/promotion.dart';
 import 'game_event.dart';
 import 'game_state.dart';
 
@@ -23,6 +24,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<TileTapped>(_onTileTapped);
     on<ActionSelected>(_onActionSelected);
     on<CombatConfirmed>(_onCombatConfirmed);
+    on<PromotionChosen>(_onPromotionChosen);
     on<SelectionCancelled>(_onSelectionCancelled);
     on<EndTurnRequested>(_onEndTurnRequested);
     on<MovementAnimationCompleted>(_onMovementDone);
@@ -112,10 +114,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             unit: current.unit,
             origin: current.origin,
             targets: current.attackableTargets));
+      case BattleAction.promote:
+        final options = PromotionSystem.optionsFor(current.unit);
+        if (options.isEmpty) return;
+        emit(ChoosingPromotion(_board,
+            unit: current.unit, origin: current.origin, options: options));
       case BattleAction.wait:
         current.unit.hasActed = true;
         _afterPlayerAction(emit);
     }
+  }
+
+  void _onPromotionChosen(PromotionChosen event, Emitter<GameState> emit) {
+    final current = state;
+    if (current is! ChoosingPromotion) return;
+    PromotionSystem.apply(current.unit, event.promotion);
+    current.unit.hasActed = true;
+    _afterPlayerAction(emit);
   }
 
   void _onCombatConfirmed(CombatConfirmed event, Emitter<GameState> emit) {
@@ -139,6 +154,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       current.unit.hasMoved = false;
       emit(_selectionFor(current.unit));
     } else if (current is ChoosingTarget) {
+      emit(_actionMenuFor(current.unit, current.origin));
+    } else if (current is ChoosingPromotion) {
       emit(_actionMenuFor(current.unit, current.origin));
     } else if (current is CombatPreviewState) {
       emit(ChoosingTarget(_board,
@@ -263,7 +280,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   UnitActionMenu _actionMenuFor(Unit unit, Point<int> origin) =>
       UnitActionMenu(_board,
-          unit: unit, origin: origin, attackableTargets: _targetsFor(unit));
+          unit: unit,
+          origin: origin,
+          attackableTargets: _targetsFor(unit),
+          canPromote: PromotionSystem.canPromote(unit));
 
   List<Unit> _targetsFor(Unit unit) => _board.units
       .where((u) =>

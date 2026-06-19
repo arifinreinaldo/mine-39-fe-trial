@@ -9,6 +9,7 @@ import 'package:ember_tactics/data/models/weapon.dart';
 import 'package:ember_tactics/game/logic/combat.dart';
 import 'package:ember_tactics/game/logic/enemy_ai.dart';
 import 'package:ember_tactics/game/logic/movement.dart';
+import 'package:ember_tactics/game/logic/promotion.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 GameBoard buildBoard(List<List<int>> terrain, List<Unit> units) {
@@ -364,6 +365,54 @@ void main() {
       );
       g.clampToCaps();
       expect(g.defense, 30);
+    });
+  });
+
+  group('promotion', () {
+    Unit promotable() {
+      final u = makeUnit(
+        id: 'm',
+        unitClass: UnitClass.myrmidon,
+        faction: Faction.player,
+        weapon: Weapon.byId('swiftEdge'),
+        x: 0,
+        y: 0,
+        strength: 10,
+        defense: 5,
+      );
+      u.level = 10;
+      u.heldItems.add('heroCrest');
+      return u;
+    }
+
+    test('requires level 10 and the right seal', () {
+      final u = promotable();
+
+      u.level = 9;
+      expect(PromotionSystem.optionsFor(u), isEmpty);
+
+      u.level = 10;
+      u.heldItems.clear();
+      expect(PromotionSystem.optionsFor(u), isEmpty);
+
+      u.heldItems.add('heroCrest');
+      final options = PromotionSystem.optionsFor(u);
+      expect(options.map((p) => p.to),
+          containsAll([UnitClass.swordmaster, UnitClass.assassin]));
+    });
+
+    test('applying a branch swaps class, adds bonus, consumes the seal', () {
+      final u = promotable();
+      final toSwordmaster = u.unitClass.promotions
+          .firstWhere((p) => p.to == UnitClass.swordmaster);
+
+      PromotionSystem.apply(u, toSwordmaster);
+
+      expect(u.unitClass, UnitClass.swordmaster);
+      expect(u.level, 1);
+      expect(u.heldItems, isEmpty);
+      expect(u.strength, 12); // +2 from the bonus
+      expect(u.defense, 7); // +2 from the bonus
     });
   });
 }

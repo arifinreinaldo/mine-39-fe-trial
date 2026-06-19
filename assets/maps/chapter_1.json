@@ -23,11 +23,11 @@
     [2, 2, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 2, 2]
   ],
   "units": [
-    {"id": "kira", "name": "Kira", "class": "myrmidon", "faction": "player", "gender": "female", "weapon": "swiftEdge", "level": 3, "x": 2, "y": 5, "hp": 20, "strength": 7, "magic": 0, "skill": 12, "speed": 13, "luck": 8, "defense": 5, "resistance": 3, "con": 7},
-    {"id": "bram", "name": "Bram", "class": "knight", "faction": "player", "weapon": "ironLance", "level": 3, "x": 1, "y": 5, "hp": 28, "strength": 9, "magic": 0, "skill": 6, "speed": 4, "luck": 3, "defense": 11, "resistance": 2, "con": 12},
+    {"id": "kira", "name": "Kira", "class": "myrmidon", "faction": "player", "gender": "female", "weapon": "swiftEdge", "level": 10, "items": ["heroCrest"], "x": 2, "y": 5, "hp": 20, "strength": 7, "magic": 0, "skill": 12, "speed": 13, "luck": 8, "defense": 5, "resistance": 3, "con": 7},
+    {"id": "bram", "name": "Bram", "class": "knight", "faction": "player", "weapon": "ironLance", "level": 10, "items": ["knightCrest"], "x": 1, "y": 5, "hp": 28, "strength": 9, "magic": 0, "skill": 6, "speed": 4, "luck": 3, "defense": 11, "resistance": 2, "con": 12},
     {"id": "lyle", "name": "Lyle", "class": "archer", "faction": "player", "weapon": "ironBow", "level": 3, "x": 1, "y": 6, "hp": 22, "strength": 8, "magic": 0, "skill": 9, "speed": 8, "luck": 5, "defense": 5, "resistance": 3, "con": 8},
     {"id": "mira", "name": "Mira", "class": "mage", "faction": "player", "gender": "female", "weapon": "flame", "level": 3, "x": 1, "y": 4, "hp": 18, "strength": 2, "magic": 9, "skill": 8, "speed": 7, "luck": 6, "defense": 3, "resistance": 6, "con": 5},
-    {"id": "tora", "name": "Tora", "class": "fighter", "faction": "player", "weapon": "hammer", "level": 4, "x": 2, "y": 6, "hp": 30, "strength": 11, "magic": 0, "skill": 6, "speed": 6, "luck": 2, "defense": 8, "resistance": 1, "con": 14},
+    {"id": "tora", "name": "Tora", "class": "fighter", "faction": "player", "weapon": "hammer", "level": 10, "items": ["heroCrest"], "x": 2, "y": 6, "hp": 30, "strength": 11, "magic": 0, "skill": 6, "speed": 6, "luck": 2, "defense": 8, "resistance": 1, "con": 14},
 
     {"id": "raider", "name": "Raider", "class": "fighter", "faction": "enemy", "weapon": "ironAxe", "level": 2, "x": 9, "y": 3, "hp": 24, "strength": 8, "magic": 0, "skill": 4, "speed": 5, "luck": 1, "defense": 4, "resistance": 1, "con": 11},
     {"id": "pike1", "name": "Pikeman", "class": "soldier", "faction": "enemy", "weapon": "ironLance", "level": 2, "x": 9, "y": 6, "hp": 22, "strength": 7, "magic": 0, "skill": 6, "speed": 6, "luck": 2, "defense": 6, "resistance": 2, "con": 9},

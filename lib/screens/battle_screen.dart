@@ -10,6 +10,7 @@ import '../game/bloc/game_state.dart';
 import '../game/widgets/action_menu.dart';
 import '../game/widgets/combat_preview_panel.dart';
 import '../game/widgets/game_board_view.dart';
+import '../game/widgets/promotion_menu.dart';
 import '../game/widgets/unit_info_panel.dart';
 import '../l10n/game_strings.dart';
 
@@ -130,6 +131,7 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
       UnitSelected(:final unit) => unit,
       UnitActionMenu(:final unit) => unit,
       ChoosingTarget(:final unit) => unit,
+      ChoosingPromotion(:final unit) => unit,
       CombatPreviewState(:final unit) => unit,
       _ => null,
     };
@@ -143,7 +145,17 @@ class _BattleScaffoldState extends State<_BattleScaffold> {
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: ActionMenu(canAttack: state.attackableTargets.isNotEmpty),
+              child: ActionMenu(
+                  canAttack: state.attackableTargets.isNotEmpty,
+                  canPromote: state.canPromote),
+            ),
+          ),
+        if (state is ChoosingPromotion)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: PromotionMenu(state: state),
             ),
           ),
         if (state is ChoosingTarget)

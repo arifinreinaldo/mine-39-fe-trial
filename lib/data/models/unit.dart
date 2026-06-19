@@ -39,8 +39,10 @@ class Unit {
     int? movement,
     this.level = 1,
     this.exp = 0,
+    List<String>? heldItems,
   })  : hp = maxHp,
-        movement = movement ?? unitClass.baseMove;
+        movement = movement ?? unitClass.baseMove,
+        heldItems = heldItems ?? <String>[];
 
   final String id;
   final String name;
@@ -62,6 +64,9 @@ class Unit {
   int level;
   int exp;
   Weapon weapon;
+
+  /// Consumable items the unit carries (e.g. promotion seals), by catalogue id.
+  final List<String> heldItems;
 
   /// Grid position (column = x, row = y).
   int x;

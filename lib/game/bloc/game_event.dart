@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import '../../data/models/unit_class.dart';
+
 /// Player-chosen action from the post-move menu.
-enum BattleAction { attack, wait }
+enum BattleAction { attack, promote, wait }
 
 /// Events fed into [GameBloc].
 ///
@@ -30,6 +32,12 @@ class ActionSelected extends GameEvent {
 
 class CombatConfirmed extends GameEvent {
   const CombatConfirmed();
+}
+
+/// The player picked a branch in the promotion menu.
+class PromotionChosen extends GameEvent {
+  const PromotionChosen(this.promotion);
+  final Promotion promotion;
 }
 
 class SelectionCancelled extends GameEvent {

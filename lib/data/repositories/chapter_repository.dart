@@ -89,6 +89,8 @@ class ChapterRepository {
       y: json['y'] as int,
       level: (json['level'] as int?) ?? 1,
       movement: json['movement'] as int?,
+      heldItems:
+          (json['items'] as List?)?.map((e) => e as String).toList() ?? const [],
     );
   }
 }

@@ -21,6 +21,8 @@ class GameStrings {
   String className(UnitClass c) => t('class.${c.name}');
   String traitLabel(UnitTrait tr) => t('trait.${tr.name}');
   String weaponTypeLabel(WeaponType w) => t('weaponType.${w.name}');
+  String itemLabel(String id) => t('item.$id');
+  String ui(String key) => t('ui.$key');
 
   /// The active locale. Swap this (and trigger a rebuild) to relabel everything.
   static GameStrings current = indonesian;
@@ -99,6 +101,22 @@ const Map<String, String> _id = {
   'weaponType.axe': 'Kapak',
   'weaponType.bow': 'Panah',
   'weaponType.magic': 'Sihir',
+  // Promotion items
+  'item.heroCrest': 'Lambang Pahlawan',
+  'item.knightCrest': 'Lambang Ksatria',
+  'item.guidingRing': 'Cincin Pemandu',
+  'item.orionsBolt': 'Panah Orion',
+  'item.oceanSeal': 'Segel Samudra',
+  'item.elysianWhip': 'Cambuk Elysia',
+  'item.lunarBrace': 'Gelang Bulan',
+  'item.solarBrace': 'Gelang Surya',
+  'item.levelUp': 'Tingkat 10',
+  // UI
+  'ui.attack': 'Serang',
+  'ui.wait': 'Tunggu',
+  'ui.cancel': 'Batal',
+  'ui.promote': 'Naik Kelas',
+  'ui.choosePromotion': 'Pilih kelas baru',
 };
 
 /// English fallback (generic genre terms).
@@ -162,4 +180,18 @@ const Map<String, String> _en = {
   'weaponType.axe': 'Axe',
   'weaponType.bow': 'Bow',
   'weaponType.magic': 'Magic',
+  'item.heroCrest': 'Hero Crest',
+  'item.knightCrest': 'Knight Crest',
+  'item.guidingRing': 'Guiding Ring',
+  'item.orionsBolt': "Orion's Bolt",
+  'item.oceanSeal': 'Ocean Seal',
+  'item.elysianWhip': 'Elysian Whip',
+  'item.lunarBrace': 'Lunar Brace',
+  'item.solarBrace': 'Solar Brace',
+  'item.levelUp': 'Level 10',
+  'ui.attack': 'Attack',
+  'ui.wait': 'Wait',
+  'ui.cancel': 'Cancel',
+  'ui.promote': 'Promote',
+  'ui.choosePromotion': 'Choose a promotion',
 };

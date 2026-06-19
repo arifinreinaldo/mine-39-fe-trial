@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../../data/models/game_board.dart';
 import '../../data/models/unit.dart';
+import '../../data/models/unit_class.dart';
 import '../logic/combat.dart';
 
 /// States emitted by [GameBloc].
@@ -71,10 +72,25 @@ class UnitActionMenu extends BattleState {
     required this.unit,
     required this.origin,
     required this.attackableTargets,
+    required this.canPromote,
   });
   final Unit unit;
   final Point<int> origin;
   final List<Unit> attackableTargets;
+  final bool canPromote;
+}
+
+/// Choosing which class to promote into (1-of-2, or 3 for trainees).
+class ChoosingPromotion extends BattleState {
+  const ChoosingPromotion(
+    super.board, {
+    required this.unit,
+    required this.origin,
+    required this.options,
+  });
+  final Unit unit;
+  final Point<int> origin;
+  final List<Promotion> options;
 }
 
 /// Choosing which enemy to strike.
